@@ -58,6 +58,16 @@ angular.module('ui.sortable').directive('uiMultiSortable', ['uiSortableConfig', 
         if(attrs.modelSubset === undefined) {
           model.splice(self.data.destPosition, 0, model.splice(self.data.origPosition, 1)[0]);
         } else {
+          // console.log("got here! destSubset is " + self.data.destSubset);
+          // console.log(model.columns[2]);
+          if('undefined' === typeof $parse(self.data.destSubset)(model)) {
+            //nasty patch to specifically handle the case that firebase doesn't store null arrays
+            //AND angular $parse doesn't allow assignment to a $parsed expression that is null
+            //Specifically expects 'items' in the model, yuck.
+            var myvar = (self.data.destSubset).split('.');
+            // console.log('myvar[0] = ' + myvar[0]);
+            ($parse(myvar[0])(model)).items = [];
+          }
           ($parse(self.data.destSubset)(model)).splice(self.data.destPosition, 0, ($parse(self.data.origSubset)(model)).splice(self.data.origPosition, 1)[0]);
         }
       }
